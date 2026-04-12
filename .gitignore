@@ -8,7 +8,7 @@
 *.swo
 
 # Build outputs
-target/
+backend/target/
 dist/
 build/
 node_modules/
