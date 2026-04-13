@@ -3,8 +3,10 @@ package com.fooddelivery.config;
 import com.fooddelivery.security.JwtAuthFilter;
 import com.fooddelivery.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -46,6 +48,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:5173,https://deployfood-delivery-fullstack-swaga-indol.vercel.app,https://*.vercel.app}")
+    private String corsAllowedOrigins;
+
     /**
      * Main security filter chain configuration
      */
@@ -60,6 +65,7 @@ public class SecurityConfig {
 
             // Define which endpoints are public vs protected
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Public: register and login don't need JWT
                 .requestMatchers("/api/auth/**").permitAll()
                 // Everything else requires a valid JWT token
@@ -91,7 +97,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        List<String> origins = Arrays.stream(corsAllowedOrigins.split(","))
+            .map(String::trim)
+            .filter(origin -> !origin.isEmpty())
+            .toList();
+
+        config.setAllowedOriginPatterns(origins);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
