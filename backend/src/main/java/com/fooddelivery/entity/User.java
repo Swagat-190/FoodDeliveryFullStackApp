@@ -12,7 +12,12 @@ import lombok.AllArgsConstructor;
  * Stores registered user information
  */
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_user_role_mobile", columnNames = {"role", "mobile_number"})
+    }
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Data
 @NoArgsConstructor
@@ -29,6 +34,10 @@ public class User {
     // Email must be unique - used as login identifier
     @Column(nullable = false, unique = true)
     private String email;
+
+    // Mobile number is unique inside each role (USER/SELLER)
+    @Column(name = "mobile_number", length = 20)
+    private String mobileNumber;
 
     // Password stored as BCrypt hash (never plain text)
     @Column(nullable = false)

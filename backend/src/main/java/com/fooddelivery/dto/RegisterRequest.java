@@ -18,6 +18,10 @@ public class RegisterRequest {
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message = "Mobile number is required")
+    @Pattern(regexp = "^[0-9]{10,13}$", message = "Mobile number must be 10 to 13 digits")
+    private String mobileNumber;
+
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;

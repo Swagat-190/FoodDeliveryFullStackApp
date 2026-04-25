@@ -142,9 +142,58 @@ All protected endpoints require:
 {
   "name": "John Doe",
   "email": "john@example.com",
+  "mobileNumber": "+919876543210",
+  "role": "USER",
   "password": "secret123"
 }
 ```
+
+Mobile rules:
+- `mobileNumber` is required.
+- It must be 10 to 13 digits.
+- It is unique per role (`USER` and `SELLER` keep separate uniqueness scopes intentionally).
+
+### 📱 Free Mobile Notifications
+
+Order notifications are wired to mobile numbers:
+- Customer (`USER`): gets notification when order status changes.
+- Seller (`SELLER`): gets notification when a new order is placed for their restaurant.
+
+Free mode defaults:
+- `NOTIFICATION_MOBILE_PROVIDER=log` (simulation only, logs notification payloads; does not send SMS)
+
+Optional free-tier SMS mode:
+- `NOTIFICATION_MOBILE_PROVIDER=textbelt`
+- `NOTIFICATION_TEXTBELT_URL=https://textbelt.com/text`
+- `NOTIFICATION_TEXTBELT_KEY=textbelt`
+
+Note: Textbelt free tier has quota limits.
+
+### 🔔 Free Notification Channels (Recommended)
+
+Default free-first notifications:
+- In-app notifications (stored in DB and available via API)
+- Email notifications (via SMTP)
+
+Notification endpoints (authenticated):
+- `GET /api/notifications`
+- `GET /api/notifications/unread-count`
+- `PUT /api/notifications/{id}/read`
+- `PUT /api/notifications/read-all`
+
+SMTP environment variables:
+- `MAIL_HOST`
+- `MAIL_PORT` (default `587`)
+- `MAIL_USERNAME`
+- `MAIL_PASSWORD`
+- `MAIL_SMTP_AUTH` (default `true`)
+- `MAIL_SMTP_STARTTLS` (default `true`)
+- `NOTIFICATION_EMAIL_FROM`
+- `NOTIFICATION_EMAIL_ENABLED` (default `true`)
+
+Production migration guide:
+- Use [backend/migrations/V2026_04_26__mobile_number_role_unique_safe.sql](backend/migrations/V2026_04_26__mobile_number_role_unique_safe.sql)
+- The script normalizes old values, checks duplicates, then adds constraints safely.
 
 **Login body:**
 ```json

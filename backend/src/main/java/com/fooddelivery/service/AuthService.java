@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
+    private static final String MOBILE_REGEX = "^[0-9]{10,13}$";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -53,13 +55,23 @@ public class AuthService {
         if (!requestedRole.equals("USER") && !requestedRole.equals("SELLER")) {
             throw new RuntimeException("Invalid role. Allowed roles are USER and SELLER");
         }
+
+        String normalizedMobile = normalizeMobileNumber(request.getMobileNumber());
+        if (!normalizedMobile.matches(MOBILE_REGEX)) {
+            throw new RuntimeException("Invalid mobile number format");
+        }
+        if (userRepository.existsByRoleAndMobileNumber(requestedRole, normalizedMobile)) {
+            throw new RuntimeException("Mobile number already registered for " + requestedRole.toLowerCase() + " account");
+        }
+
         user.setRole(requestedRole);
+        user.setMobileNumber(normalizedMobile);
 
         // Save to DB
         userRepository.save(user);
 
         // Generate JWT token for immediate login after registration
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getMobileNumber());
 
         return new AuthResponse(token, user.getEmail(), user.getName(), user.getId(), user.getRole());
     }
@@ -81,7 +93,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Generate JWT token
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getMobileNumber());
 
         return new AuthResponse(token, user.getEmail(), user.getName(), user.getId(), user.getRole());
     }
@@ -92,5 +104,19 @@ public class AuthService {
     public User getProfile(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private String normalizeMobileNumber(String mobileNumber) {
+        if (mobileNumber == null) {
+            return "";
+        }
+        String normalized = mobileNumber.replaceAll("[^0-9]", "");
+        if (normalized.length() == 11 && normalized.startsWith("0")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.length() == 10) {
+            normalized = "91" + normalized;
+        }
+        return normalized;
     }
 }

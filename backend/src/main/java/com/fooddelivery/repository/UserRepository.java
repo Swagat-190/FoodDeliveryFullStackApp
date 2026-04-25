@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Check if email already registered
     boolean existsByEmail(String email);
+
+    // Same mobile can exist once per role (USER and SELLER are independent)
+    boolean existsByRoleAndMobileNumber(String role, String mobileNumber);
 }

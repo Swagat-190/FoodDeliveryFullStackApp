@@ -32,7 +32,7 @@ export default function Login() {
         <div style={styles.header}>
           <div className="auth-logo">🍔</div>
           <h1 className="auth-title">Welcome back</h1>
-          <p className="auth-subtitle">Sign in to your ByToSoul account</p>
+          <p className="auth-subtitle">Sign in to your ByteSoul account</p>
         </div>
 
         {/* Error */}
@@ -80,13 +80,6 @@ export default function Login() {
           Don't have an account?{' '}
           <Link to="/register" className="auth-link">Create one →</Link>
         </p>
-
-        {/* Demo credentials hint */}
-        <div style={styles.demo}>
-          <p style={styles.demoText}>
-            💡 <strong>Demo:</strong> Register a new account to get started
-          </p>
-        </div>
       </div>
     </div>
   )
@@ -96,16 +89,5 @@ const styles = {
   header: {
     textAlign: 'center',
     marginBottom: '32px',
-  },
-  demo: {
-    marginTop: '16px',
-    background: '#fff2ea',
-    borderRadius: '8px',
-    padding: '10px 14px',
-  },
-  demoText: {
-    fontSize: '0.83rem',
-    color: '#555',
-    textAlign: 'center',
   },
 }

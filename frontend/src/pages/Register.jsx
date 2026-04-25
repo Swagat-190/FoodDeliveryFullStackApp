@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function Register() {
-  const [form, setForm]    = useState({ name: '', email: '', password: '', confirm: '', role: 'USER' })
+  const [form, setForm]    = useState({ name: '', email: '', mobileNumber: '', password: '', confirm: '', role: 'USER' })
   const [error, setError]  = useState('')
   const { register, loading } = useAuth()
   const navigate           = useNavigate()
@@ -24,7 +24,7 @@ export default function Register() {
       return
     }
 
-    const result = await register(form.name, form.email, form.password, form.role)
+    const result = await register(form.name, form.email, form.mobileNumber, form.password, form.role)
     if (result.success) {
       navigate('/')
     } else {
@@ -38,7 +38,7 @@ export default function Register() {
         {/* Header */}
         <div style={styles.header}>
           <div className="auth-logo">🍔</div>
-          <h1 className="auth-title">Join ByToSoul</h1>
+            <h1 className="auth-title">Join ByteSoul</h1>
           <p className="auth-subtitle">Create your account to start ordering or selling</p>
           <p style={styles.helperText}>Seller accounts do not need restaurant details here. You can add restaurants after logging in.</p>
         </div>
@@ -71,6 +71,21 @@ export default function Register() {
               placeholder="you@example.com"
               value={form.email}
               onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Mobile Number</label>
+            <input
+              className="form-input"
+              type="tel"
+              name="mobileNumber"
+              placeholder="919876543210"
+              value={form.mobileNumber}
+              onChange={handleChange}
+              pattern="^[0-9]{10,13}$"
+              title="Enter 10 to 13 digits. Example: 9876543210 or 919876543210"
               required
             />
           </div>

@@ -44,6 +44,12 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
+        @Autowired
+        private InAppNotificationService inAppNotificationService;
+
+        @Autowired
+        private EmailNotificationService emailNotificationService;
+
     /**
      * Place an order from the user's current cart
      */
@@ -101,6 +107,22 @@ public class OrderService {
         // Clear the cart after successful order
         cartItemRepository.deleteByUserId(user.getId());
 
+        User seller = savedOrder.getRestaurant().getSeller();
+        String sellerTitle = "New order placed";
+        String sellerMessage = String.format(
+                "Order #%d for %s is %s. Total: %.2f",
+                savedOrder.getId(),
+                savedOrder.getRestaurant().getName(),
+                savedOrder.getStatus(),
+                savedOrder.getTotalAmount()
+        );
+        inAppNotificationService.createNotification(seller, sellerTitle, sellerMessage, "ORDER_PLACED");
+        emailNotificationService.sendEmailAsync(
+                seller.getEmail(),
+                "ByteSoul: New order #" + savedOrder.getId(),
+                sellerMessage
+        );
+
         return savedOrder;
     }
 
@@ -147,7 +169,27 @@ public class OrderService {
                         throw new RuntimeException("Invalid order status");
                 }
 
+                String previousStatus = order.getStatus();
+                if (normalizedStatus.equals(previousStatus)) {
+                        return order;
+                }
+
                 order.setStatus(normalizedStatus);
-                return orderRepository.save(order);
+                Order updatedOrder = orderRepository.save(order);
+                User customer = updatedOrder.getUser();
+                String customerTitle = "Order status updated";
+                String customerMessage = String.format(
+                        "Order #%d status changed from %s to %s.",
+                        updatedOrder.getId(),
+                        previousStatus,
+                        updatedOrder.getStatus()
+                );
+                inAppNotificationService.createNotification(customer, customerTitle, customerMessage, "ORDER_STATUS");
+                emailNotificationService.sendEmailAsync(
+                        customer.getEmail(),
+                        "ByteSoul: Order #" + updatedOrder.getId() + " status updated",
+                        customerMessage
+                );
+                return updatedOrder;
         }
 }

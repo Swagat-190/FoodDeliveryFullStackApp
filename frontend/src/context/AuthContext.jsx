@@ -36,10 +36,10 @@ export function AuthProvider({ children }) {
   }, [user, token])
 
   /** Register new account */
-  const register = async (name, email, password, role) => {
+  const register = async (name, email, mobileNumber, password, role) => {
     setLoading(true)
     try {
-      const res = await authAPI.register({ name, email, password, role })
+      const res = await authAPI.register({ name, email, mobileNumber, password, role })
       const { token: tok, ...userInfo } = res.data.data
       setToken(tok)
       setUser(userInfo)

@@ -50,3 +50,11 @@ export const sellerAPI = {
   getMenu:        (restaurantId) => api.get(`/seller/restaurants/${restaurantId}/menu`),
   updateStatus:   (id, status) => api.put(`/seller/orders/${id}/status`, { status }),
 }
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────
+export const notificationAPI = {
+  getAll:        ()     => api.get('/notifications'),
+  getUnreadCount:()     => api.get('/notifications/unread-count'),
+  markRead:      (id)   => api.put(`/notifications/${id}/read`),
+  markAllRead:   ()     => api.put('/notifications/read-all'),
+}

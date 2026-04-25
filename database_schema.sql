@@ -16,8 +16,10 @@ CREATE TABLE IF NOT EXISTS users (
     id       BIGINT AUTO_INCREMENT PRIMARY KEY,
     name     VARCHAR(100)  NOT NULL,
     email    VARCHAR(150)  NOT NULL UNIQUE,
+    mobile_number VARCHAR(20),
     password VARCHAR(255)  NOT NULL,   -- BCrypt hash, never plain text
-    role     VARCHAR(20)   NOT NULL DEFAULT 'USER'
+    role     VARCHAR(20)   NOT NULL DEFAULT 'USER',
+    UNIQUE KEY uq_user_role_mobile (role, mobile_number)
 );
 
 -- ─── RESTAURANTS TABLE ───────────────────────────────────────
@@ -69,6 +71,19 @@ CREATE TABLE IF NOT EXISTS orders (
     delivery_address VARCHAR(500),
     items_snapshot   TEXT,           -- JSON-like string of ordered items
     CONSTRAINT fk_order_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ─── NOTIFICATIONS TABLE ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT        NOT NULL,
+    title      VARCHAR(120)  NOT NULL,
+    message    VARCHAR(1000) NOT NULL,
+    type       VARCHAR(40)   NOT NULL,
+    is_read    BOOLEAN       NOT NULL DEFAULT FALSE,
+    created_at DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notification_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
